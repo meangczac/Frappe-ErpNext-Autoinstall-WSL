@@ -177,7 +177,7 @@ start_mariadb() {
     # Initialize the database if it doesn't exist
     if [ ! -d "$DATA_DIR/mysql" ]; then
         echo -e "${BLUE}Initializing MariaDB data directory...${NC}"
-        mysql_install_db --user=mysql --datadir="$DATA_DIR" --auth-root-authentication-method=normal
+        mariadb-install-db --user=mysql --datadir="$DATA_DIR" --auth-root-authentication-method=normal
     fi
 
     # Create custom configuration file
@@ -197,11 +197,11 @@ socket = $SOCKET_FILE
 EOF
 
     # Start MariaDB with custom configuration
-    mysqld_safe --defaults-file="$CUSTOM_CNF" &
+    mariadbd-safe --defaults-file="$CUSTOM_CNF" &
 
     # Wait until MariaDB is running
     for i in {1..10}; do
-        if mysqladmin --socket="$SOCKET_FILE" ping --silent; then
+        if mariadb-admin --socket="$SOCKET_FILE" ping --silent; then
             echo -e "${GREEN}MariaDB is running.${NC}"
             return 0
         else
@@ -213,6 +213,7 @@ EOF
     echo -e "${RED}MariaDB did not start within the expected time.${NC}"
     exit 1
 }
+
 
 # Secure MariaDB Installation
 secure_mariadb() {
