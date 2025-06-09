@@ -130,22 +130,26 @@ apt-get install -y apt-transport-https curl lsb-release gnupg ca-certificates so
 # Install MariaDB 10.6
 # ----------------------------
 install_mariadb() {
-    echo -e "${BLUE}Installing MariaDB Server 10.6...${NC}"    
+    echo -e "${BLUE}Installing MariaDB Server (10.6 or higher)...${NC}"    
     apt-get install -y curl gnupg lsb-release software-properties-common    
     curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup -o mariadb_repo_setup    
     chmod +x mariadb_repo_setup    
-    sudo ./mariadb_repo_setup --mariadb-server-version="mariadb-10.6"    
+    sudo ./mariadb_repo_setup --mariadb-server-version="mariadb-10.11"  # <-- change this to 10.11 or desired
     rm mariadb_repo_setup    
     apt-get update -y    
     apt-get install -y mariadb-server mariadb-backup
 
     # Verify MariaDB version
-    mariadb_version=$(mariadb --version | awk '{print $5}' | cut -d'.' -f1-2)
-    if [ "$mariadb_version" != "10.6" ]; then
-        echo -e "${RED}MariaDB version $mariadb_version installed, but version 10.6 is required.${NC}"
-        exit 1
-    fi
-    echo -e "${GREEN}MariaDB 10.6 installed successfully.${NC}"
+    mariadb_version=$(mariadb --version | awk '{print $5}' | cut -d'-' -f1)
+    case "$mariadb_version" in
+        10.6|10.11|11.4|11.8)
+            echo -e "${GREEN}MariaDB $mariadb_version installed successfully.${NC}"
+            ;;
+        *)
+            echo -e "${RED}MariaDB version $mariadb_version is not supported by this installer.${NC}"
+            exit 1
+            ;;
+    esac
 }
 
 # Start MariaDB Service with Unique Configuration
