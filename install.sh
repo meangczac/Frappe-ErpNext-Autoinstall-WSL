@@ -142,7 +142,7 @@ install_mariadb() {
     rm mariadb_repo_setup
 
     apt-get update -y
-    apt-get install -y mariadb-server mariadb-backup
+    apt-get install -y mariadb-server mariadb-client mariadb-backup
 
     # Check if mariadb command is available
     if ! command -v mariadb >/dev/null 2>&1; then
@@ -154,6 +154,7 @@ install_mariadb() {
     installed_version=$(mariadb --version | awk '{print $5}' | cut -d'-' -f1)
     echo -e "${GREEN}MariaDB version $installed_version installed successfully.${NC}"
 }
+
 
 # Start MariaDB Service with Unique Configuration
 start_mariadb() {
