@@ -130,30 +130,31 @@ apt-get install -y apt-transport-https curl lsb-release gnupg ca-certificates so
 # Install MariaDB 10.6
 # ----------------------------
 install_mariadb() {
-    echo -e "${BLUE}Installing latest MariaDB Server...${NC}"
-
-    apt-get install -y curl gnupg lsb-release software-properties-common
-
-    # Download and run the MariaDB repo setup script WITHOUT specifying a version
-    curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup -o mariadb_repo_setup
-    chmod +x mariadb_repo_setup
-    sudo ./mariadb_repo_setup
-
-    rm mariadb_repo_setup
+    echo -e "${BLUE}Installing MariaDB Server + Client...${NC}"
 
     apt-get update -y
-    apt-get install -y mariadb-server mariadb-client mariadb-backup
+    apt-get install -y curl gnupg lsb-release software-properties-common
 
-    # Check if mariadb command is available
-    if ! command -v mariadb >/dev/null 2>&1; then
-        echo -e "${RED}MariaDB is not installed properly.${NC}"
+    # Use MariaDB repo setup to choose a supported version
+    curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup -o mariadb_repo_setup
+    chmod +x mariadb_repo_setup
+    sudo ./mariadb_repo_setup --mariadb-server-version="10.11" # or 11.x
+
+    rm mariadb_repo_setup
+    apt-get update -y
+
+    # Ensure both server and client are installed
+    apt-get install -y mariadb-server mariadb-client mariadb-backup libmysqlclient-dev
+
+    if ! command -v mariadb >/dev/null; then
+        echo -e "${RED}Error: 'mariadb' client not found.${NC}"
         exit 1
     fi
 
-    # Optionally, print installed version
-    installed_version=$(mariadb --version | awk '{print $5}' | cut -d'-' -f1)
-    echo -e "${GREEN}MariaDB version $installed_version installed successfully.${NC}"
+    version=$(mariadb --version | awk '{print $5}' | cut -d'-' -f1)
+    echo -e "${GREEN}MariaDB $version installed.${NC}"
 }
+
 
 
 # Start MariaDB Service with Unique Configuration
